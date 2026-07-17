@@ -2,6 +2,7 @@
 
 [![CI](https://github.com/YANG-ERA/GraphPCA-Turbo/actions/workflows/ci.yml/badge.svg)](https://github.com/YANG-ERA/GraphPCA-Turbo/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Documentation](https://img.shields.io/badge/docs-ReadTheDocs-blue.svg)](https://graphpca-analyses.readthedocs.io/en/latest/)
 
 GraphPCA-Turbo is a scalable and interpretable graph-regularized dimension-reduction framework for spatial transcriptomics. It preserves the original single-sample GraphPCA interface and extends it with iterative and optional C++-accelerated solvers, hierarchical multi-sample partial pooling, cohort-level loading coordinates, rotation-aware convergence diagnostics, and projection of unseen spatial sections.
 
@@ -250,7 +251,16 @@ python -m build
 python -m twine check dist/*
 ```
 
-Dataset-specific tutorials and paper-scale reproducibility workflows will be added separately. Large datasets and manuscript result archives are not distributed with the production package.
+## Tutorials and documentation
+
+The public [GraphPCA documentation](https://graphpca-analyses.readthedocs.io/en/latest/) provides executable tutorials with saved outputs, including analyses based on datasets used in the GraphPCA-Turbo study:
+
+- [Tutorial 4: Visium HD mouse small intestine](https://graphpca-analyses.readthedocs.io/en/latest/Tutorial4_MSI.html)
+- [Tutorial 5: multi-section ABC-WMB analysis](https://graphpca-analyses.readthedocs.io/en/latest/Tutorial5_ABC_WMB.html)
+
+The ABC-WMB tutorial covers the input contract, section-wise preprocessing, loading precomputed section embeddings and shared loadings, rotation-aware program maps, leading loading genes, anatomical associations, section-specific loading deviations, and serial-section continuity. Because the complete atlas contains millions of cells, the raw atlas and full model outputs are not bundled with the package. The tutorial instead includes a compact result-derived sample with visible executed figures and placeholder paths for local full-data files.
+
+Package-level examples for single-section fitting, hierarchical multi-section fitting, and projection of unseen sections are provided above and in [`examples/README_multisample.md`](examples/README_multisample.md). Paper-scale scripts and result archives are distributed separately from the installable package.
 
 ## Citation
 
