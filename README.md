@@ -346,6 +346,12 @@ Machine-readable citation metadata are provided in [`CITATION.cff`](CITATION.cff
 
 ## Version history
 
+### v2.1.0
+
+- Added optional disk-backed, section-separable hierarchical fitting
+- Added restartable fitting and on-demand disk-backed embeddings
+- Preserved the established in-memory API and tutorials
+
 ### v2.0.0
 
 - Added hierarchical multi-sample GraphPCA
