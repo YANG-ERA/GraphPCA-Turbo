@@ -4,6 +4,9 @@
 
 ### Added
 - Hierarchical multisample GraphPCA.
+- Optional `execution_mode="out_of_core"` for disk-backed, section-separable
+  hierarchical fitting, with a reusable section-store writer, resumable state,
+  and on-demand embedding access.
 - Global and grouped partial-pooling formulations.
 - Rotation-aware gauge alignment and convergence diagnostics.
 - Reusable shared loading coordinates for new-section projection workflows.

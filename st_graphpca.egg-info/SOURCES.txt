@@ -1,7 +1,6 @@
 CHANGELOG.md
 CITATION.cff
 LICENSE
-LICENSE.txt
 MANIFEST.in
 README.md
 gpca_core.cpp
@@ -12,7 +11,10 @@ GraphPCA/_version.py
 GraphPCA/gpca.py
 GraphPCA/hierarchical_multigpca.py
 GraphPCA/multigpca.py
+GraphPCA/out_of_core_hierarchical.py
 GraphPCA/utils.py
+examples/README_multisample.md
+examples/out_of_core_hierarchical.py
 st_graphpca.egg-info/PKG-INFO
 st_graphpca.egg-info/SOURCES.txt
 st_graphpca.egg-info/dependency_links.txt
@@ -20,3 +22,4 @@ st_graphpca.egg-info/not-zip-safe
 st_graphpca.egg-info/requires.txt
 st_graphpca.egg-info/top_level.txt
 tests/test_hierarchical_public_api.py
+tests/test_out_of_core_hierarchical.py
