@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: st-graphpca
-Version: 2.0.0
+Version: 2.1.0
 Summary: Scalable hierarchical graph-regularized dimension reduction for single- and multi-sample spatial transcriptomics.
 Home-page: https://github.com/YANG-ERA/GraphPCA-Turbo
 Author: Jiyuan Yang
@@ -375,6 +375,12 @@ DOI: `10.1186/s13059-024-03429-x`
 Machine-readable citation metadata are provided in [`CITATION.cff`](CITATION.cff).
 
 ## Version history
+
+### v2.1.0
+
+- Added optional disk-backed, section-separable hierarchical fitting
+- Added restartable fitting and on-demand disk-backed embeddings
+- Preserved the established in-memory API and tutorials
 
 ### v2.0.0
 
