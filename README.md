@@ -19,6 +19,7 @@ The Python distribution remains named `st-graphpca`, and the import namespace re
 - **Rotation-aware convergence and stationarity diagnostics**
 - **Projection of unseen samples** through `Project_Hierarchical_Multi_GPCA`
 - **Sparse expression-matrix support**
+- **Optional disk-backed, section-separable hierarchical fitting** for atlases that do not fit comfortably in RAM
 
 ## Method overview
 
@@ -168,6 +169,95 @@ adata.obsm["X_GraphPCA_HMS"]
 adata.varm["GraphPCA_HMS_Ws"]
 adata.varm["GraphPCA_HMS_W0"]
 ```
+
+### Disk-backed hierarchical analysis for large atlases
+
+`execution_mode="in_memory"` is the default and preserves the established
+AnnData-based API, including all existing tutorials. For a cohort with too
+many sections to keep in memory, create a reusable section store by yielding
+one preprocessed expression matrix and its spatial graph at a time, then opt
+in to `execution_mode="out_of_core"`.
+
+```python
+from pathlib import Path
+from scipy import sparse
+from GraphPCA import (
+    Run_Hierarchical_Multi_GPCA,
+    create_hierarchical_section_store,
+)
+
+# Each tuple is (section name, cells-by-genes sparse matrix, spatial graph).
+# This generator can load one section from disk, yield it, and then release it.
+def section_generator(section_records):
+    for name, expression_file, graph_file in section_records:
+        yield name, sparse.load_npz(expression_file), sparse.load_npz(graph_file)
+
+section_records = [
+    ("section_01", "prepared/section_01_X.npz", "prepared/section_01_graph.npz"),
+    ("section_02", "prepared/section_02_X.npz", "prepared/section_02_graph.npz"),
+]
+store = create_hierarchical_section_store(
+    "prepared/graphpca_section_store",
+    section_generator(section_records),
+)
+
+Z_disk, W0, Ws_list, info = Run_Hierarchical_Multi_GPCA(
+    adatas=None,                       # required: do not pre-load all sections
+    execution_mode="out_of_core",
+    section_store=store,
+    out_of_core_output_dir="results/graphpca_disk_backed",
+    n_components=30,
+    lambdas=0.5,
+    rhos=0.15,
+    sample_weights="equal_slice",
+    init_strategy="shared",
+    mode="iterative",                 # or "accelerated" when available
+    max_iter=50,
+    return_info=True,
+)
+
+# Materialize only the section currently needed.
+Z_section_01 = Z_disk.load(0, mmap_mode="r")
+print(info.converged, info.n_iter)
+```
+
+The section store includes the spatial graph, so do not also pass `locations`,
+`networks`, `platforms`, or `n_neighbors` in this mode. `Z_disk` is a
+`DiskBackedEmbeddings` collection rather than an in-memory list; it has
+`len()`, indexing, `.load(i)`, and `.items()` methods. Embeddings, model
+state, and a `run_summary.json` are saved under `out_of_core_output_dir`; set
+`out_of_core_resume=True` to continue an interrupted fit. `return_log` and
+`save_reconstruction` are intentionally unavailable because they would break
+the low-memory contract.
+
+This mode keeps the expression matrix, graph operator, and embedding state of
+only the current section in working memory (plus small global loading arrays).
+It avoids a global cell-level graph, but it is not a promise that memory is
+limited to a single array: the largest section and a staged embedding update
+still determine the working-memory peak. Use the default in-memory mode when
+the cohort already fits comfortably in RAM, since it can be faster.
+
+#### MERFISH Aging engineering benchmark
+
+On the selected MERFISH Aging input (376,107 cells, 31 sections, 374 genes;
+`K=30`, `lambda=0.5`, equal-section weights, `rho=0.1487261502079812`, C++
+PCG), both implementations converged and gave essentially identical final
+objectives and primary section-wise clustering quality. Peak process-tree RSS
+fell by about 47% with the disk-backed mode. This is an engineering benchmark,
+not a manuscript result.
+
+| Measure | Default in-memory mode | Disk-backed mode |
+|---|---:|---:|
+| Converged | yes (51 iterations) | yes (38 iterations) |
+| Final objective | 332.440564 | 332.440345 |
+| Solver/fit time | 7.45 min solver time | 8.40 min full fit time |
+| Peak process-tree RSS | 2.154 GiB | 1.140 GiB |
+| Primary section-wise refined ARI | 0.626373 | 0.626901 |
+
+The two modes use different valid initializations (`hybrid` in memory,
+streaming `shared` on disk), so bitwise-identical embeddings are not expected.
+The result supports the disk-backed mode as a memory-saving option; it does
+not establish a universal runtime improvement.
 
 ### Projection of an unseen sample
 

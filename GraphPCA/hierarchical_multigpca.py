@@ -589,7 +589,7 @@ def _loading_diagnostics(
 
 
 def Run_Hierarchical_Multi_GPCA(
-    adatas: Sequence[Any],
+    adatas: Optional[Sequence[Any]] = None,
     locations: Optional[Sequence[Optional[np.ndarray]]] = None,
     n_components: int = 50,
     networks: Optional[Sequence[Optional[ArrayLike]]] = None,
@@ -626,6 +626,10 @@ def Run_Hierarchical_Multi_GPCA(
     reconstruction_key: str = "GraphPCA_HMS_ReX",
     return_log: bool = False,
     return_info: bool = False,
+    execution_mode: str = "in_memory",
+    section_store: Optional[Any] = None,
+    out_of_core_output_dir: Optional[Any] = None,
+    out_of_core_resume: bool = False,
 ):
     """Run partially pooled hierarchical multi-sample GraphPCA-Turbo.
 
@@ -678,6 +682,16 @@ def Run_Hierarchical_Multi_GPCA(
         ``'shared'``, ``'individual'``, or ``'hybrid'``. The default hybrid
         initialization averages cohort and aligned sample-specific loading
         estimates on the Stiefel manifold.
+    execution_mode
+        ``'in_memory'`` (default) preserves the established AnnData API.
+        ``'out_of_core'`` processes a prepared disk-backed section store one
+        section at a time. It requires ``section_store`` and
+        ``out_of_core_output_dir``; its returned embedding collection loads
+        one section on demand rather than retaining all embeddings in RAM.
+        Spatial graphs must be written into the section store in advance;
+        this mode does not accept ``locations`` or ``networks``. It uses the
+        objective-plus-aligned-change stopping rule; stationarity diagnostics
+        are reported as unavailable (``NaN``).
 
     Returns
     -------
@@ -685,6 +699,70 @@ def Run_Hierarchical_Multi_GPCA(
         Sample embeddings, global loading, and sample-specific loadings.
         Optional logs and diagnostics are appended according to flags.
     """
+    if execution_mode == "out_of_core":
+        if adatas is not None:
+            raise ValueError(
+                "Pass adatas=None in out_of_core mode. Creating a full AnnData "
+                "list first would not provide end-to-end memory savings."
+            )
+        if any(value is not None for value in (locations, networks, platforms, n_neighbors)):
+            raise ValueError(
+                "out_of_core mode reads its spatial graphs from section_store; "
+                "do not also provide locations, networks, platforms, or n_neighbors."
+            )
+        if not align or not align_each_iteration:
+            raise ValueError(
+                "out_of_core mode requires rotation alignment for stable disk-backed updates."
+            )
+        if section_store is None or out_of_core_output_dir is None:
+            raise ValueError(
+                "out_of_core mode requires section_store and out_of_core_output_dir."
+            )
+        if return_log or save_reconstruction:
+            raise ValueError(
+                "return_log and save_reconstruction are unavailable in out_of_core mode."
+            )
+        if init_strategy != "shared":
+            warnings.warn(
+                "out_of_core mode uses a streaming shared initialization; "
+                "init_strategy is ignored.",
+                RuntimeWarning,
+                stacklevel=2,
+            )
+        if n_jobs != 1:
+            warnings.warn(
+                "out_of_core mode intentionally processes one section at a time; "
+                "n_jobs is ignored.",
+                RuntimeWarning,
+                stacklevel=2,
+            )
+        from .out_of_core_hierarchical import run_hierarchical_multi_gpca_out_of_core
+        return run_hierarchical_multi_gpca_out_of_core(
+            section_store=section_store,
+            output_dir=out_of_core_output_dir,
+            n_components=n_components,
+            lambdas=lambdas,
+            rhos=rhos,
+            sample_weights=sample_weights,
+            center=center,
+            pcg_tol=pcg_tol,
+            pcg_max_iter=pcg_max_iter,
+            outer_tol=outer_tol,
+            objective_tol=objective_tol,
+            objective_patience=objective_patience,
+            relaxed_outer_factor=relaxed_outer_factor,
+            loading_inner_max_iter=loading_inner_max_iter,
+            loading_inner_tol=loading_inner_tol,
+            max_iter=max_iter,
+            random_seed=random_seed,
+            mode=mode,
+            resume=out_of_core_resume,
+            return_info=return_info,
+        )
+    if execution_mode != "in_memory":
+        raise ValueError("execution_mode must be 'in_memory' or 'out_of_core'.")
+    if adatas is None:
+        raise ValueError("adatas is required for execution_mode='in_memory'.")
     adatas = list(adatas)
     p = _validate_samples(adatas, n_components)
     n_samples = len(adatas)

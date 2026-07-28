@@ -3,3 +3,4 @@ include LICENSE
 include CITATION.cff
 include CHANGELOG.md
 include gpca_core.cpp
+recursive-include examples *.py *.md
