@@ -351,9 +351,11 @@ python -m twine check dist/*
 The public [GraphPCA documentation](https://graphpca-analyses.readthedocs.io/en/latest/) provides executable tutorials with saved outputs, including analyses based on datasets used in the GraphPCA-Turbo study:
 
 - [Tutorial 4: Visium HD mouse small intestine](https://graphpca-analyses.readthedocs.io/en/latest/Tutorial4_MSI.html)
-- [Tutorial 5: multi-section ABC-WMB analysis](https://graphpca-analyses.readthedocs.io/en/latest/Tutorial5_ABC_WMB.html)
+- [Tutorial 5: MERFISH Aging multi-donor analysis](https://graphpca-analyses.readthedocs.io/en/latest/Tutorial5_MERFISH_Aging.html)
+- [Tutorial 6: multi-section ABC-WMB analysis](https://graphpca-analyses.readthedocs.io/en/latest/Tutorial5_ABC_WMB.html)
+- [Tutorial 7: MOSTA FAST26 stage-aware analysis](https://graphpca-analyses.readthedocs.io/en/latest/Tutorial6_MOSTA_FAST26.html)
 
-The ABC-WMB tutorial covers the input contract, section-wise preprocessing, loading precomputed section embeddings and shared loadings, rotation-aware program maps, leading loading genes, anatomical associations, section-specific loading deviations, and serial-section continuity. Because the complete atlas contains millions of cells, the raw atlas and full model outputs are not bundled with the package. The tutorial instead includes a compact result-derived sample with visible executed figures and placeholder paths for local full-data files.
+The MERFISH Aging tutorial covers shared programme rotation, leading loading genes, spatial score maps, donor-held-out projection, and the appropriately scoped endothelial-versus-rest P08 specificity contrast. The ABC-WMB tutorial covers the input contract, shared programmes, anatomical associations, section-specific loading deviations, and serial continuity. The MOSTA tutorial covers stage-balanced preprocessing, disk-backed section stores, stage-aware loading centres, programme maps, and section-balanced stage summaries. Large raw atlases and full embedding matrices are not bundled with the package; the tutorials keep explicit local input contracts and do not treat unrun pseudotime algorithms or descriptive stage summaries as fitted trajectories.
 
 Package-level examples for single-section fitting, hierarchical multi-section fitting, and projection of unseen sections are provided above and in [`examples/README_multisample.md`](examples/README_multisample.md). Paper-scale scripts and result archives are distributed separately from the installable package.
 
