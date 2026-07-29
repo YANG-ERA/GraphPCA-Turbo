@@ -186,7 +186,7 @@ from GraphPCA import (
     create_hierarchical_section_store,
 )
 
-# Each tuple is (section name, cells-by-genes sparse matrix, spatial graph).
+# Each tuple is (section name, cells-by-genes expression matrix, spatial graph).
 # This generator can load one section from disk, yield it, and then release it.
 def section_generator(section_records):
     for name, expression_file, graph_file in section_records:
@@ -199,6 +199,7 @@ section_records = [
 store = create_hierarchical_section_store(
     "prepared/graphpca_section_store",
     section_generator(section_records),
+    expression_storage="auto",        # preserve dense matrices when appropriate
 )
 
 Z_disk, W0, Ws_list, info = Run_Hierarchical_Multi_GPCA(
@@ -226,7 +227,10 @@ The section store includes the spatial graph, so do not also pass `locations`,
 `DiskBackedEmbeddings` collection rather than an in-memory list; it has
 `len()`, indexing, `.load(i)`, and `.items()` methods. Embeddings, model
 state, and a `run_summary.json` are saved under `out_of_core_output_dir`; set
-`out_of_core_resume=True` to continue an interrupted fit. `return_log` and
+`out_of_core_resume=True` to continue an interrupted fit. Each published
+iteration is an atomic checkpoint: if a job stops while a new iteration is
+being written, resuming selects the preceding complete checkpoint and discards
+the incomplete stage. `return_log` and
 `save_reconstruction` are intentionally unavailable because they would break
 the low-memory contract.
 
@@ -236,6 +240,32 @@ It avoids a global cell-level graph, but it is not a promise that memory is
 limited to a single array: the largest section and a staged embedding update
 still determine the working-memory peak. Use the default in-memory mode when
 the cohort already fits comfortably in RAM, since it can be faster.
+
+For structured cohorts, `out_of_core_group_labels` enables partial pooling
+toward a group-specific shared loading (for example, developmental stage or
+donor), while retaining a shared rotation for comparable embeddings:
+
+```python
+Z_disk, W_groups, Ws_list = Run_Hierarchical_Multi_GPCA(
+    adatas=None,
+    execution_mode="out_of_core",
+    section_store=store,
+    out_of_core_output_dir="results/stage_grouped",
+    out_of_core_group_labels=["E12.5", "E12.5", "E14.5", "E14.5"],
+    n_components=30,
+    rhos=0.15,
+)
+# W_groups has shape (number of groups, genes, components), in first-seen order.
+```
+
+No label preserves the original global-centre result (`W0`, with shape
+`(genes, components)`). This option does not create cross-section spatial
+edges; it changes only the loading-shrinkage centre.
+
+When using `mode="accelerated"`, set the OpenMP thread limit before starting
+Python (for example, `OMP_NUM_THREADS=2 python analysis.py`) and benchmark it
+on the target machine. Disk-backed fitting is section-sequential, so an
+unbounded C++ thread pool can add contention without improving throughput.
 
 #### MERFISH Aging engineering benchmark
 
@@ -345,6 +375,14 @@ DOI: `10.1186/s13059-024-03429-x`
 Machine-readable citation metadata are provided in [`CITATION.cff`](CITATION.cff).
 
 ## Version history
+
+### v2.2.0
+
+- Added dense-aware section stores, optional group-specific disk-backed
+  loading centres, and atomic complete-snapshot checkpoints
+- Preserved the default in-memory API and tutorials
+- Kept disk-backed fitting as an optional memory-saving mode rather than a
+  universal speed claim
 
 ### v2.1.0
 

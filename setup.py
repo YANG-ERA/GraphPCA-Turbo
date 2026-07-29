@@ -13,7 +13,7 @@ DESCRIPTION = 'Scalable hierarchical graph-regularized dimension reduction for s
 EMAIL = '599568651@qq.com'
 URL = "https://github.com/YANG-ERA/GraphPCA-Turbo"
 AUTHOR = 'Jiyuan Yang'
-VERSION = '2.1.0'
+VERSION = '2.2.0'
 
 try:
     with io.open(os.path.join(here, 'README.md'), encoding='utf-8') as f:
