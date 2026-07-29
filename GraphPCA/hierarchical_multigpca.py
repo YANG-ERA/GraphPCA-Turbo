@@ -630,6 +630,7 @@ def Run_Hierarchical_Multi_GPCA(
     section_store: Optional[Any] = None,
     out_of_core_output_dir: Optional[Any] = None,
     out_of_core_resume: bool = False,
+    out_of_core_group_labels: Optional[Sequence[Any]] = None,
 ):
     """Run partially pooled hierarchical multi-sample GraphPCA-Turbo.
 
@@ -692,6 +693,12 @@ def Run_Hierarchical_Multi_GPCA(
         this mode does not accept ``locations`` or ``networks``. It uses the
         objective-plus-aligned-change stopping rule; stationarity diagnostics
         are reported as unavailable (``NaN``).
+    out_of_core_group_labels
+        Optional section-level labels for ``execution_mode='out_of_core'``.
+        With labels, each section is partially pooled toward its group's
+        loading centre.  The second returned object is then an array of group
+        centres in first-occurrence label order; without labels it remains the
+        established ``(n_genes, n_components)`` global loading.
 
     Returns
     -------
@@ -744,6 +751,7 @@ def Run_Hierarchical_Multi_GPCA(
             lambdas=lambdas,
             rhos=rhos,
             sample_weights=sample_weights,
+            group_labels=out_of_core_group_labels,
             center=center,
             pcg_tol=pcg_tol,
             pcg_max_iter=pcg_max_iter,
