@@ -1,5 +1,7 @@
 # GraphPCA-Turbo
 
+**Scalable graph-regularized dimension reduction for million-cell and multi-section spatial transcriptomics via GraphPCA-Turbo**
+
 [![CI](https://github.com/YANG-ERA/GraphPCA-Turbo/actions/workflows/ci.yml/badge.svg)](https://github.com/YANG-ERA/GraphPCA-Turbo/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Documentation](https://img.shields.io/badge/docs-ReadTheDocs-blue.svg)](https://graphpca-analyses.readthedocs.io/en/latest/)
@@ -366,7 +368,7 @@ GraphPCA-Turbo extends the original GraphPCA method. Please cite the work corres
 ### GraphPCA-Turbo
 
 Yang, J., Qi, J., Jiang, X., Chen, X., Liu, L., and Zheng, X.  
-**Ultra-Scalable Dimension Reduction for High-Resolution Spatial Transcriptomics via GraphPCA-Turbo.** Manuscript in preparation, 2026.
+**Scalable graph-regularized dimension reduction for million-cell and multi-section spatial transcriptomics via GraphPCA-Turbo.** Manuscript in preparation, 2026.
 
 ### Original GraphPCA
 
