@@ -26,7 +26,7 @@ license: MIT
 
 preferred-citation:
   type: article
-  title: "Ultra-Scalable Dimension Reduction for High-Resolution Spatial Transcriptomics via GraphPCA-Turbo"
+  title: "Scalable graph-regularized dimension reduction for million-cell and multi-section spatial transcriptomics via GraphPCA-Turbo"
   authors:
     - family-names: "Yang"
       given-names: "Jiyuan"
